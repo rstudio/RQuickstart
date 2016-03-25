@@ -69,6 +69,8 @@ bnames %>%
   group_by(name, sex) %>%
   # Calculate the total number of children for each group
   summarise(total = sum(n)) %>% 
+  # Ungroup the data (so we do not arrange within groups)
+  ungroup() %>%
   # Then order the groups from the largest total to the smallest
   arrange(desc(total))
 

@@ -106,8 +106,8 @@ ggplot(mpg, aes(displ, hwy)) +
 
 # Data Wrnagling with dplyr
 
-library(babynames)
-View(babynames)
+library(reportsWS)
+View(bnames)
 
 my_name <- filter(bnames, name == "Garrett", sex == "M")
 my_name <- select(my_name, name, year, prop)
@@ -129,9 +129,9 @@ library(dplyr)
 ## tbl's
 
 babynames
-tbl_df(babynames)
+tbl_df(bnames)
 
-bnames <- tbl_df(babynames)
+bnames <- tbl_df(bnames)
 
 ## Verbs
 
@@ -142,7 +142,7 @@ select(storms, storm, pressure)
 
 filter(storms, wind == 50)
 filter(storms, wind >= 50)
-filter(storms, wind > 60, wind == 40)
+filter(storms, wind > 60, wind <= 40)
 
 View(births)
 
@@ -174,6 +174,7 @@ bnames %>%
   filter(!is.na(n)) %>%
   group_by(name, sex) %>%
   summarise(total = sum(n)) %>%
+  ungroup() %>%
   arrange(desc(total))
 
 tmp1 <- left_join(bnames, births, by = c("year", "sex"))
@@ -182,23 +183,25 @@ tmp3 <- select(tmp2, name, sex, year, n)
 tmp4 <- filter(tmp3, !is.na(n)) 
 tmp5 <- group_by(tmp4, name, sex)
 tmp6 <- summarise(tmp5, total = sum(n))
-tmp7 <- arrange(tmp6, desc(total))
+tmp7 <- ungroup(tmp6)
+tmp8 <- arrange(tmp7, desc(total))
 
 arrange(
-  summarise(
-    group_by(
-      filter(
-        select(
-          mutate(
-            left_join(bnames, births, by = c("year", "sex")), 
-            n = round(prop * births)
-          ), name, sex, year, n
-        ), !is.na(n)
-      ), name, sex
-    ), total = sum(n)
-  ), desc(total)
+  ungroup(
+    summarise(
+      group_by(
+        filter(
+          select(
+            mutate(
+              left_join(bnames, births, by = c("year", "sex")), 
+              n = round(prop * births)
+            ), name, sex, year, n
+          ), !is.na(n)
+        ), name, sex
+      ), total = sum(n)
+    )
+  ), desc(total),
 )
-
 
 
 
